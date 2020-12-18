@@ -27,10 +27,22 @@ Classify relationships between medical symptoms, diagnosis, and other terms
 * Documentation: https://mrec.readthedocs.io.
 
 
-Features
---------
+Getting Started
+---------------
 
-* TODO
+These instructions will help you get a copy of the project up and running on your local machine for development and
+testing purposes. See deployment for notes on how to deploy the project on a live system.
+
+Building
+**********************
+
+Instructions for how to build your project
+Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your
+fork for local development:
+::
+
+    $ conda env create -n mrec_env -f env.yml
+    $ conda activate mrec_env
 
 Credits
 -------
