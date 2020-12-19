@@ -21,6 +21,7 @@ from mrec.visualization import SessionState
 from mrec.visualization.medical_term_lookup import display_medical_terms
 import mrec.config as config
 from mrec.model.MREClassifier import MREClassifier
+from mrec.features.transform import clean_text
 
 # Module level constants
 FEATURES_LIST = ['_unit_id', 'relation', 'sentence', 'direction', 'term1', 'term2']
@@ -66,8 +67,9 @@ def run():
     st.header('Classify Relationship')
     recommend = st.button('Click here to Classify Relationship')
     if recommend:
-        classifier = MREClassifier(model_weights='temp-model-weights')
-        session_state.predictions = classifier.predict(X=session_state.data, features_names='temp-feature-names')
+        model_weight = './models/random_forest.joblib'
+        classifier = MREClassifier(model_weights=model_weight)
+        session_state.predictions, _ = classifier.predict(X=session_state.data)
 
         # Report the predictions results
         st.write(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | USR ID: {session_state.id}] Prediction: {session_state.predictions}')
