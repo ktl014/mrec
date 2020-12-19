@@ -27,7 +27,7 @@ import string
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
-import nltk
+from mrec.features.transform import clean_text
 
 # Third Party Imports
 import joblib
@@ -38,29 +38,12 @@ import mrec.mrec
 logger = logging.getLogger(__name__)
 
 
-# Function to get the correct position of word net
-# Basically figure out if word is noun/verb/adj/adv to convert to its most basic form
-def get_wordnet_pos(word):
-    """Map POS tag to first character lemmatize() accepts"""
-    tag = nltk.pos_tag([word])[0][1][0].upper()
-    tag_dict = {"J": nltk.corpus.wordnet.ADJ,
-                "N": nltk.corpus.wordnet.NOUN,
-                "V": nltk.corpus.wordnet.VERB,
-                "R": nltk.corpus.wordnet.ADV}
-    return tag_dict.get(tag, nltk.corpus.wordnet.NOUN)
-
-# Function to remove punctuation, tokenize, remove stopwords and lemmatize
-def clean_text(text):
-    lemmatizer = nltk.stem.WordNetLemmatizer()
-    stopwords = nltk.corpus.stopwords.words('english')
-    text = "".join([word.lower() for word in text if word not in string.punctuation])
-    tokens = text.split()
-    text = [word for word in tokens if word not in stopwords]
-    text = [lemmatizer.lemmatize(word, get_wordnet_pos(word)) for word in text]
-    return text
-
-
 def main():
+    """Train and save the model
+
+    Returns: NULL
+
+    """
     ## Preprocessing dataset
     logger.debug('Preprocessing classifier..')
 

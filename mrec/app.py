@@ -18,6 +18,7 @@ from mrec.data.dataset import load_data
 from mrec.visualization import SessionState
 import mrec.config as config
 from mrec.model.MREClassifier import MREClassifier
+from mrec.features.transform import clean_text
 
 #=== Load dataset as cache ===#
 @st.cache
@@ -59,8 +60,9 @@ def run():
     st.header('Classify Relationship')
     recommend = st.button('Click here to Classify Relationship')
     if recommend:
-        classifier = MREClassifier(model_weights='temp-model-weights')
-        session_state.predictions = classifier.predict(X=session_state.data, features_names='temp-feature-names')
+        model_weight = './models/random_forest.joblib'
+        classifier = MREClassifier(model_weights=model_weight)
+        session_state.predictions, _ = classifier.predict(X=session_state.data)
 
         # Report the predictions results
         st.write(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | USR ID: {session_state.id}]')
