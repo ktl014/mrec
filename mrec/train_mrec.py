@@ -22,28 +22,85 @@ import logging
 import os
 import datetime
 import pickle
+from mrec.data.dataset import load_data
+import string
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
+import nltk
 
 # Third Party Imports
 import joblib
 
-# SEtup default
+# Setup default
 import mrec.mrec
 
 logger = logging.getLogger(__name__)
 
+
+# Function to get the correct position of word net
+# Basically figure out if word is noun/verb/adj/adv to convert to its most basic form
+def get_wordnet_pos(word):
+    """Map POS tag to first character lemmatize() accepts"""
+    tag = nltk.pos_tag([word])[0][1][0].upper()
+    tag_dict = {"J": nltk.corpus.wordnet.ADJ,
+                "N": nltk.corpus.wordnet.NOUN,
+                "V": nltk.corpus.wordnet.VERB,
+                "R": nltk.corpus.wordnet.ADV}
+    return tag_dict.get(tag, nltk.corpus.wordnet.NOUN)
+
+# Function to remove punctuation, tokenize, remove stopwords and lemmatize
+def clean_text(text):
+    lemmatizer = nltk.stem.WordNetLemmatizer()
+    stopwords = nltk.corpus.stopwords.words('english')
+    text = "".join([word.lower() for word in text if word not in string.punctuation])
+    tokens = text.split()
+    text = [word for word in tokens if word not in stopwords]
+    text = [lemmatizer.lemmatize(word, get_wordnet_pos(word)) for word in text]
+    return text
+
+
 def main():
-    # Train the model
+    ## Preprocessing dataset
+    logger.debug('Preprocessing classifier..')
+
+    count_vect = CountVectorizer(ngram_range=(1, 3), analyzer=clean_text)
+    X_counts_train = count_vect.fit_transform(train['sentence'])
+    X_counts_validation = count_vect.transform(validation['sentence'])
+
+    ## Train the model
     logger.debug('Training classifier..')
 
-    # Evaluate the classifier
+    random_forest = RandomForestClassifier()
+    random_forest.fit(X_counts_train, train['relation'])
+
+    ## Evaluate the classifier
     logger.debug('Evaluating classifier..')
 
-    # Save model
+    forest_accuracy = cross_val_score(random_forest, X_counts_validation, validation['relation'], scoring="accuracy",
+                                      cv=10)
+    logger.debug('Accuracy score on validation set:', forest_accuracy.mean())
+
+    ## Save model
     logger.debug('Saving the model..')
+
+    path = '../../models/random_forest.joblib'
+    joblib.dump((random_forest, count_vect), path)
 
 if __name__ == '__main__':
     logger.debug('Loading dataset...')
+
     # Read in training, validation data and labels
+    csv_fnames = {'train': 'dataset/raw/train.csv', 'validation': 'dataset/raw/validation.csv',
+                  'test': 'dataset/raw/test.csv'}
+    dataset = load_data(csv_fnames)
+    train, validation = dataset.train, dataset.validation
+
+    # Feature = sentence, target = relation (treats and causes only)
+    relation_type = ['causes', 'treats']
+    train = train[['sentence', 'relation']][train['relation'].isin(relation_type)].drop_duplicates()
+    validation = validation[['sentence', 'relation']][validation['relation'].isin(relation_type)].drop_duplicates()
+
     logger.debug('Loaded dataset!')
 
     main()
