@@ -53,12 +53,12 @@ def run():
     st.header('Generate User')
     if st.button('Click here to Generate User ID'):
         session_state.data = dataset.sample(n=1, random_state=1)
-        session_state.id = session_state.data['_unit_id']
+        session_state.id = session_state.data['_unit_id'].values[0]
         st.write(session_state.id)
 
     # === View raw data ===#
     st.subheader('Raw Data')
-    if st.checkbox('Show data') and (session_state.id != 0).all():
+    if st.checkbox('Show data') and (session_state.id != 0):
         st.json(session_state.data.to_dict())
 
     # === Classification button ===#
@@ -70,13 +70,12 @@ def run():
         session_state.predictions = classifier.predict(X=session_state.data, features_names='temp-feature-names')
 
         # Report the predictions results
-        st.write(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | USR ID: {session_state.id}]')
-        st.write(f'Prediction: {session_state.predictions}')
+        st.write(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | USR ID: {session_state.id}] Prediction: {session_state.predictions}')
+        st.write(session_state.data['direction'].values[0])
 
         # === display the medical terminology ===#
         _data = session_state.data
         display_medical_terms(_data["term1"].values[0], _data["term2"].values[0])
-
 
     else:
         st.write("Press the above button to classify")

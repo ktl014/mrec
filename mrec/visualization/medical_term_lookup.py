@@ -5,8 +5,9 @@ import pandas as pd
 import streamlit as st
 
 
-MEDICAL_LOOKUP = pd.read_csv(os.path.join(os.path.dirname(__file__), 'medical_lookup.csv')).to_dict()
-
+MEDICAL_LOOKUP = pd.read_csv(os.path.join(os.path.dirname(__file__), 'medical_lookup.csv'))\
+    .set_index('term')['description'].to_dict()
+print(MEDICAL_LOOKUP)
 logger = logging.getLogger(__name__)
 
 def display_medical_terms(term1, term2):
@@ -26,5 +27,5 @@ def get_description(term: str):
     try:
         return MEDICAL_LOOKUP[term]
     except KeyError as e:
-        logger.warning(f"Medical term ({term}) was not found in the medical_lookup.csv")
+        logger.warn(f"Medical term ({term}) was not found in the medical_lookup.csv")
         return "Description not yet included"
