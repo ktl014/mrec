@@ -13,7 +13,7 @@ class TestDataset():
     def test_load_data(self):
         #=== Test Inputs ===#
         TEST_CSV_DATASETS = {
-            'train': "../../dataset/raw/train.csv"
+            'train': "dataset/raw/train.csv"
         }
         datasets = load_data(TEST_CSV_DATASETS)
         assert hasattr(datasets, 'train')

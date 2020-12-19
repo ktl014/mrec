@@ -21,11 +21,11 @@ def display_medical_terms(term1, term2):
 
 def get_description(term: str):
     if not isinstance(term, str):
-        logger.warn(f"Expected str, but got {type(term)} for term")
+        logger.warning(f"Expected str, but got {type(term)} for term")
         raise TypeError("Wrong type passed into `term` when retrieving description")
 
     try:
         return MEDICAL_LOOKUP[term]
     except KeyError as e:
-        logger.warn(f"Medical term ({term}) was not found in the medical_lookup.csv")
+        logger.warning(f"Medical term ({term}) was not found in the medical_lookup.csv")
         return "Description not yet included"
