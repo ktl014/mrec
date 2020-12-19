@@ -8,5 +8,5 @@ class MREClassifier(object):
 
     def predict(self,X,features_names):
         # return self.model.predict_proba(X)
-        return "treat"
+        return "causes"
 
