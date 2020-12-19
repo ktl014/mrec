@@ -23,9 +23,10 @@ class MREClassifier(object):
 
         Args:
             X: data point from user's input (contains a sentence and a relation)
-
+            
         Returns:
             Dictionary of prediction and probability
+
 
         """
         X_counts = self.count_vect.transform(X)
