@@ -7,7 +7,6 @@ import streamlit as st
 
 MEDICAL_LOOKUP = pd.read_csv(os.path.join(os.path.dirname(__file__), 'medical_lookup.csv'))\
     .set_index('term')['description'].to_dict()
-print(MEDICAL_LOOKUP)
 logger = logging.getLogger(__name__)
 
 def display_medical_terms(term1, term2):

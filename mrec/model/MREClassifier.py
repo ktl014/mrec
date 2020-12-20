@@ -2,6 +2,13 @@ import joblib
 import logging
 import os
 
+import nltk
+for nltk_resource in ['stopwords', 'averaged_perceptron_tagger', 'wordnet']:
+    try:
+        nltk.data.find(nltk_resource)
+    except LookupError:
+        nltk.download(nltk_resource)
+
 logger = logging.getLogger(__name__)
 
 class MREClassifier(object):
@@ -19,11 +26,12 @@ class MREClassifier(object):
         Usage
 
         >>> from mrec.model.MREClassifier import MREClassifier
-        >>> prediction, proba = predict(X)
+        >>> classifier = MREClassifier(model_weights="path/to/model")
+        >>> prediction, proba = classifier.predict(X)
 
         Args:
             X: data point from user's input (contains a sentence and a relation)
-            
+
         Returns:
             Dictionary of prediction and probability
 
@@ -32,4 +40,7 @@ class MREClassifier(object):
         X_counts = self.count_vect.transform(X)
         prediction = self.model.predict(X_counts)
         proba = self.model.predict_proba(X_counts)
-        return prediction[0], proba[0]
+        if len(prediction) == 1:
+            return prediction[0], max(proba[0])
+        else:
+            return prediction, proba
