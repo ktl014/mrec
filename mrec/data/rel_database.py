@@ -53,13 +53,10 @@ def create_db(db_path, input_csv):
     db = Database(db_path)
     db.cursor.execute(SQL_CMD['create'])
     logger.debug('SUCCESS: TABLE CREATED')
+    logger.debug([description for description in db.cursor.description])
 
-    df = pd.read_csv(input_csv)
-    for i, row in df.iterrows():
-        cols = str(['_unit_id', 'relation', 'direction', 'sentence', 'term1', 'term2'])
-        sql = "INSERT INTO `book_details` (`" + cols + "`) VALUES (" + "%s," * (len(row) - 1) + ", %s)"
-        db.cursor.execute(sql, tuple(row))
-        db.conn.commit()
+    df = pd.read_csv(input_csv)[['_unit_id', 'relation', 'direction', 'sentence', 'term1', 'term2']]
+    df.to_sql(name="mrec_table", con=db.conn, if_exists='append', index=False)
 
     logger.debug(f'SUCCESS: DATA FROM {input_csv} INSERTED')
 
