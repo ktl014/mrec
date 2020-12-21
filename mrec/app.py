@@ -18,12 +18,13 @@ import streamlit as st
 from sklearn.preprocessing import LabelEncoder
 
 # Project level imports
+import mrec.mrec
 from mrec.visualization.medical_term_lookup import display_medical_terms
 import mrec.config as config
 from mrec.model.MREClassifier import MREClassifier
 from mrec.model.score_mrec import accuracy, compute_cm
 from mrec.data.dataset import load_data, load_rel_database
-
+from mrec.features.transform import clean_text          # CountVectorizer dependency. Do not remove.
 
 # Module level constants
 enc = LabelEncoder()
@@ -53,7 +54,7 @@ def load_data_to_cache(csv_fnames):
     return val
 
 
-@st.cache
+@st.cache(allow_output_mutation=True)
 def load_rel_database_to_cache(db_path, table_name):
     """Load dataset from relational database
 
