@@ -14,7 +14,6 @@ import os
 import pandas as pd
 
 # Project Level Imports
-import mrec.mrec
 from mrec.data.rel_database import Database
 
 logger = logging.getLogger(__name__)

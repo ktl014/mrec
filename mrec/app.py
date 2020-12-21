@@ -4,7 +4,6 @@ Module is used to launch classification system
 
 """
 # Standard Dist Imports
-from datetime import datetime
 import logging
 import sys
 from pathlib import Path
@@ -12,7 +11,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 # Third party imports
-import os
 import altair as alt
 import numpy as np
 import pandas as pd
@@ -20,12 +18,9 @@ import streamlit as st
 from sklearn.preprocessing import LabelEncoder
 
 # Project level imports
-import mrec.mrec
-from mrec.visualization import SessionState
 from mrec.visualization.medical_term_lookup import display_medical_terms
 import mrec.config as config
 from mrec.model.MREClassifier import MREClassifier
-from mrec.features.transform import clean_text
 from mrec.model.score_mrec import accuracy, compute_cm
 from mrec.data.dataset import load_data, load_rel_database
 

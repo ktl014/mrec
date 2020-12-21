@@ -16,17 +16,13 @@ import sqlite3
 from sqlite3 import Error
 import sys
 from pathlib import Path
-from sqlalchemy import create_engine, MetaData, Table, Column, String, Integer
+from sqlalchemy import create_engine
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]) + '/')
 
 # Third party imports
-import click
-import pandas as pd
 
 # Module Level Constants
-import mrec.mrec
-from mrec.config import Constants as CONST
 
 SQL_CreateTable = '''CREATE TABLE IF NOT EXISTS mrec_table (
                  _unit_id TEXT,

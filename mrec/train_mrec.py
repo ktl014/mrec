@@ -19,11 +19,7 @@ $ python src/train_model.py
 
 # Standard dist imports
 import logging
-import os
-import datetime
-import pickle
 from mrec.data.dataset import load_data
-import string
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
@@ -33,7 +29,6 @@ from mrec.features.transform import clean_text
 import joblib
 
 # Setup default
-import mrec.mrec
 
 logger = logging.getLogger(__name__)
 
