@@ -13,11 +13,9 @@ $ python rel_database.py --db_path=../../dataset/external/mrec.db --input_csv=..
 import logging
 import os
 import sqlite3
-from pathlib import Path
 from sqlite3 import Error
 import sys
 from pathlib import Path
-from mrec.data.dataset import load_data
 from sqlalchemy import create_engine, MetaData, Table, Column, String, Integer
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]) + '/')
@@ -42,9 +40,7 @@ SQL_CreateTable = '''CREATE TABLE IF NOT EXISTS mrec_table (
 logger = logging.getLogger(__name__)
 
 def create_db(db_path, validation_csv, test_csv):
-    db_path = '../../dataset/external/mrec_3.db'
-    validation_csv = '../../dataset/raw/validation.csv'
-    test_csv = '../../dataset/raw/test.csv'
+    from mrec.data.dataset import load_data
 
     if not os.path.exists(validation_csv):
         logger.warning(f"File {validation_csv} was not found. Current dir: {os.getcwd()}")
@@ -61,14 +57,12 @@ def create_db(db_path, validation_csv, test_csv):
     db.cursor.execute(SQL_CreateTable)
     logger.debug('SUCCESS: TABLE CREATED')
 
-    df.validation[['_unit_id', 'relation', 'sentence', 'direction', 'term1', 'term2']].to_sql('mrec_table', con=db.engine, if_exists='append', index=False)
-    db.cursor.execute("SELECT * FROM mrec_table")
+    cols = ['_unit_id', 'relation', 'sentence', 'direction', 'term1', 'term2']
+    df.validation[cols].to_sql('mrec_table', con=db.engine, if_exists='append', index=False)
+    df.test[cols].to_sql('mrec_table', con=db.engine, if_exists='append', index=False)
 
-    myresult = db.cursor.fetchall()
-    print(len(myresult))
-    for x in myresult:
-        print(x)
-        break
+    logger.debug('SUCCESS: INSERTED DATA')
+    db.close_connection()
 
 class Database:
     """ Database instance for CRUD interaction
@@ -107,9 +101,12 @@ class Database:
         if self.conn != None:
             self.conn.close()
 
+        if self.engine != None:
+            self.engine.dispose()
 
-db_path = '../../dataset/external/mrec.db'
-validation_csv = '../../dataset/raw/validation.csv'
-test_csv = '../../dataset/raw/test.csv'
+if __name__ == "__main__":
+    db_path = 'dataset/external/mrec.db'
+    validation_csv = 'dataset/raw/validation.csv'
+    test_csv = 'dataset/raw/test.csv'
 
-create_db(db_path, validation_csv, test_csv)
+    create_db(db_path, validation_csv, test_csv)

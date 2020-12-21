@@ -2,6 +2,9 @@ CSV_FNAMES = {
     'validation': 'dataset/raw/validation.csv',
     'test': 'dataset/raw/test.csv',
 }
+DB_PATH = {
+    'mrec': 'dataset/external/mrec.db'
+}
 
 class Constants:
     _unit_id = '_unit_id'

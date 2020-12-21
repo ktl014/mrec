@@ -4,10 +4,10 @@ import os
 
 import nltk
 for nltk_resource in ['stopwords', 'averaged_perceptron_tagger', 'wordnet']:
-    try:
-        nltk.data.find(nltk_resource)
-    except LookupError:
-        nltk.download(nltk_resource)
+     try:
+         nltk.data.find(nltk_resource)
+     except LookupError:
+         nltk.download(nltk_resource)
 
 logger = logging.getLogger(__name__)
 
