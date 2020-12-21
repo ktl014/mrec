@@ -16,7 +16,7 @@ class MREClassifier(object):
     def __init__(self, model_weights: str):
         if not os.path.exists(model_weights):
             logger.warning(f"File {model_weights} was not found. Current dir: {os.getcwd()}")
-            raise FileNotFoundError("Could not initalize MREClassifier because model weights not found.")
+            raise FileNotFoundError("Could not initialize MREClassifier because model weights not found.")
 
         self.model, self.count_vect = joblib.load(model_weights)
 
