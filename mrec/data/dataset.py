@@ -15,6 +15,7 @@ import pandas as pd
 
 # Project Level Imports
 import mrec.mrec
+from mrec.data.rel_database import Database
 
 logger = logging.getLogger(__name__)
 
@@ -52,3 +53,34 @@ def load_data(csv_fnames, processed=False):
 
     MRECDataset = namedtuple('MRECDataset', list(datasets.keys()))
     return MRECDataset(**datasets)
+
+
+def load_rel_database(db_path :str, table_name):
+    """Load dataset from rel database to dataframe
+
+    Usage
+    ------
+    >>> from mrec.data.dataset import load_rel_database
+    >>> table_name = 'mrec_table'
+    >>> db_path = '../../dataset/external/mrec.db'
+    >>> df = load_rel_database(db_path, table_name)
+
+    Args:
+        db_path (str): database file path to load data from
+        table_name (str): the name of the table in the database
+
+    Returns:
+        DataFrame: unprocessed data from rel database
+    """
+    if not isinstance(db_path, str):
+        raise TypeError("Error found with type of input `db_path` when loading rel database")
+
+    if not os.path.exists(db_path):
+        raise FileNotFoundError(f"File {db_path} was not found. Current dir: {os.getcwd()}")
+
+    db = Database(db_path)
+    SQL_QUERY = "SELECT * FROM " + table_name
+    dataset = pd.read_sql(SQL_QUERY, con=db.conn)
+    db.close_connection()
+
+    return dataset
