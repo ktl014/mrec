@@ -7,60 +7,57 @@ import logging
 
 
 # Third Party Imports
-import joblib
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.svm import SVC
-from sklearn.model_selection import cross_val_score, GridSearchCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, \
+    GradientBoostingClassifier, BaggingClassifier, AdaBoostClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import LinearSVC, NuSVC, SVC
+from sklearn.model_selection import cross_val_score
 
 # Project Level Imports
 from mrec.data.make_dataset import preprocessing_dataset
-from mrec.model.train_mrec import train_mrec
-from mrec.model.make_classifiers import make_classifiers
-from mrec.model.grid_search import tuning_parameters
-
 
 logger = logging.getLogger(__name__)
 
-SAVE_PATH = '../../models/final_model.joblib'
+models = [
+    SVC(), NuSVC(), LinearSVC(max_iter=5000), GradientBoostingClassifier(),
+    KNeighborsClassifier(), LogisticRegression(), DecisionTreeClassifier(),
+    BaggingClassifier(), ExtraTreesClassifier(), RandomForestClassifier(),
+    AdaBoostClassifier()
+]
+
 
 def select_model():
+    """Train a set of model and out put their val score and the best one"""
     results = {}
-
-    classifiers, parameters = make_classifiers()
     train, train_label, val, val_label, test, test_label = preprocessing_dataset()
 
-    logger.debug('Training models..')
+    print('Training models..')
+    for model in models:
+        model.fit(train, train_label)
+        score = cross_val_score(model, val, val_label, scoring='accuracy', cv=10)
 
-    for classifier_name, classifier in classifiers.items():
-        train_mrec(train, train_label, classifier)
-        score = cross_val_score(classifier, val, val_label, scoring='accuracy', cv=10)
-        result = {"Classifier": classifier,
-                  'Val_acc': score.mean()}
-        results.update({classifier_name: result})
+        model_name = model.__class__.__name__
+        result = {"Classifier": model_name,
+                  'Val_acc': round(score.mean(), 4),
+                  'Std': round(score.std(), 3)}
+        results.update({model_name: result})
 
+        print('{}: {} (+/-{})'.format(model_name, round(score.mean(), 4), round(score.std(), 3)))
+
+    std = 0
     best_score = 0
     best_model = ''
 
-    for classifier_name, classifier_score in results.items():
-        print(classifier_name + ':', classifier_score['Val_acc'])
-        if best_score < classifier_score['Val_acc']:
-            best_score = classifier_score['Val_acc']
+    for classifier_name, score in results.items():
+        if best_score < score['Val_acc']:
+            best_score = score['Val_acc']
+            std = score['Std']
             best_model = classifier_name
-    print('\nBest model:', best_model, '\nBest val score:', best_score)
 
-    classifier = classifiers[best_model]
-    param = parameters[best_model]
-
-    logger.debug('Tuning models..')
-    final_model = tuning_parameters(classifier, param, train, train_label)
-
-    logger.debug('Testing models..')
-    predictions = final_model.predict(test)
-    print('\nBest model:', best_model)
-    print('Test set accuracy:', accuracy_score(test_label, predictions))
-
-    joblib.dump(final_model, SAVE_PATH)
+    print('\nBest model: {}'.format(best_model))
+    print('Val accuracy score: {} (+/-{})'.format(best_score, std))
 
 
 if __name__ == '__main__':
