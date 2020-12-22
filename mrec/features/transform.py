@@ -37,3 +37,12 @@ def clean_text(text):
     text = [word for word in tokens if word not in stopwords]
     text = [lemmatizer.lemmatize(word, get_wordnet_pos(word)) for word in text]
     return text
+
+if __name__ == "__main__":
+    import nltk
+
+    for nltk_resource in ['stopwords', 'averaged_perceptron_tagger', 'wordnet']:
+        try:
+            nltk.data.find(nltk_resource)
+        except LookupError:
+            nltk.download(nltk_resource)

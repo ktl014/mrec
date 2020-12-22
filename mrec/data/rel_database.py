@@ -3,12 +3,9 @@ Filename: rel_database
 Description: CRUD functions to interact with a database
 USAGE
 -----
-$ cd mrec/data
-$ python rel_database.py --db_path=../../dataset/external/mrec.db --input_csv=../../dataset/raw/validation.csv
-
+$ python rel_database.py
 
 """
-
 # imports
 import logging
 import os
@@ -21,6 +18,9 @@ from sqlalchemy import create_engine
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]) + '/')
 
 # Third party imports
+
+# Project Level Imports
+import mrec.mrec
 
 # Module Level Constants
 
@@ -51,13 +51,13 @@ def create_db(db_path, validation_csv, test_csv):
 
     db = Database(db_path)
     db.cursor.execute(SQL_CreateTable)
-    logger.debug('SUCCESS: TABLE CREATED')
+    logger.info('SUCCESS: TABLE CREATED')
 
     cols = ['_unit_id', 'relation', 'sentence', 'direction', 'term1', 'term2']
     df.validation[cols].to_sql('mrec_table', con=db.engine, if_exists='append', index=False)
     df.test[cols].to_sql('mrec_table', con=db.engine, if_exists='append', index=False)
 
-    logger.debug('SUCCESS: INSERTED DATA')
+    logger.info('SUCCESS: INSERTED DATA')
     db.close_connection()
 
 class Database:
@@ -84,10 +84,10 @@ class Database:
         """
         try:
             conn = sqlite3.connect(db_path)
-            print('SUCCESS: Table Connected')
+            logger.debug('SUCCESS: Table Connected')
             return conn
         except Error as e:
-            print(e)
+            logger.debug(e)
 
         return None
 
@@ -101,6 +101,8 @@ class Database:
             self.engine.dispose()
 
 if __name__ == "__main__":
+    assert os.getcwd() == str(Path(__file__).resolve().parents[2]), "Script must be ran from `mrec` project directory"
+
     db_path = 'dataset/external/mrec.db'
     validation_csv = 'dataset/raw/validation.csv'
     test_csv = 'dataset/raw/test.csv'
