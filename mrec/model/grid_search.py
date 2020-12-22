@@ -8,7 +8,7 @@ $ python grid_search.py
 # Launch an mlflow tracking ui after model results to compare
 $ mlflow ui
 
-Add parameters via `model/make_classifier.py` with its associated model
+Add parameters via `model/make_classifiers.py` with its associated model
 
 """
 # Standard Dist Imports
