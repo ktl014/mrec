@@ -109,3 +109,4 @@ ENV/
 .DS_Store
 .idea
 /mrec/model/mlruns/
+/mrec/mlruns/

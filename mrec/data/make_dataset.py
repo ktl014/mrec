@@ -7,6 +7,9 @@ Dataset operations module currently contains functions for the following:
 # Standard Dist
 import logging
 import joblib
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]) + '/')
 
 # Third Party Imports
 from sklearn.feature_extraction.text import CountVectorizer
@@ -15,11 +18,11 @@ from sklearn.feature_extraction.text import CountVectorizer
 from mrec.data.dataset import load_data
 from mrec.features.transform import clean_text
 
-SAVE_PATH = '../../models/count_vectorizer.joblib'
-
 logger = logging.getLogger(__name__)
 
-def preprocessing_dataset():
+SAVE_PATH = '../../models/count_vectorizer.joblib'
+
+def preprocessing_dataset(csv_fnames, save=False):
     """Preprocessing dataset and add feature engineering
 
     Usage
@@ -34,11 +37,9 @@ def preprocessing_dataset():
         X_validation_label (series): label of validation set
 
     """
-    logger.debug('Loading dataset...')
+    logger.info('Loading dataset...')
 
     # Read in training, validation data and labels
-    csv_fnames = {'train': '../../dataset/raw/train.csv', 'validation': '../../dataset/raw/validation.csv',
-                  'test': '../../dataset/raw/test.csv'}
     dataset = load_data(csv_fnames)
     train, validation, test = dataset.train, dataset.validation, dataset.test
 
@@ -63,7 +64,9 @@ def preprocessing_dataset():
 
     logger.debug('Finished preprocessing dataset!')
 
-    joblib.dump(count_vect, SAVE_PATH)
+    #TODO raise error if this path is not found
+    if save:
+        joblib.dump(count_vect, SAVE_PATH)
 
     return X_counts_train, X_train_label, X_counts_validation, X_validation_label, X_counts_test, X_test_label
 

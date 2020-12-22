@@ -15,6 +15,7 @@ $ mlflow ui
 import logging
 import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]) + '/')
 
 # Third Party Imports
 import joblib
@@ -29,18 +30,20 @@ from mrec.data.make_dataset import preprocessing_dataset
 from mrec.model.make_classifiers import make_classifiers
 from mrec.model.grid_search import tuning_parameters
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]) + '/')
 logger = logging.getLogger(__name__)
 logger.root.setLevel(logging.INFO)
 
 SAVE_PATH = '../../models/baseline_model/final_model.joblib'
+GRID_SEARCH = True
+csv_fnames = {'train': '../../dataset/raw/train.csv', 'validation': '../../dataset/raw/validation.csv',
+              'test': '../../dataset/raw/test.csv'}
 
-def select_model(grid_search=False):
+def select_model(grid_search=GRID_SEARCH):
     results = {}
 
     logger.info('Preparing datasets and models..')
     classifiers, parameters = make_classifiers()
-    train, train_label, val, val_label, test, test_label = preprocessing_dataset()
+    train, train_label, val, val_label, test, test_label = preprocessing_dataset(csv_fnames)
 
     # Begin experiment tracking
     experiment_name = 'select-models_and_grid-search' if grid_search else 'select-models'

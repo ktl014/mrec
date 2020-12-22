@@ -11,74 +11,109 @@ are listed in the documentation of the script.
 
 Usage
 -----
->>> ???
->>> ???
+>>> SAVE_MODEL = False
 >>> # then run the script using the command below
-$ python src/train_model.py
+$ python mrec/train_model.py
+# Run MlFlow UI after to view results
+$ mlflow ui
+
 """
 
 # Standard dist imports
+import sys
+from pathlib import Path
 import logging
-from mrec.data.dataset import load_data
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
-from mrec.features.transform import clean_text
+from pprint import pprint
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]) + '/')
 
 # Third Party Imports
-import joblib
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.preprocessing import LabelEncoder
+from sklearn.svm import NuSVC
+import mlflow
+import mlflow.sklearn
 
-# Setup default
+# Project Level Imports
+from mrec.data.make_dataset import preprocessing_dataset
+from mrec.model.ml_utils import fetch_logged_data
 
 logger = logging.getLogger(__name__)
+logger.root.setLevel(logging.INFO)
 
+SAVE_MODEL = False
+#TODO figure out better way to store the relative paths for these datasets (symlink????)
+csv_fnames = {'train': '../dataset/raw/train.csv', 'validation': '../dataset/raw/validation.csv',
+              'test': '../dataset/raw/test.csv'}
+
+def print_metric(gtruth, predictions, dset_name):
+    """Print 5 scoring metrics: accuracy, roc_auc, f1, precision, and recall
+
+    Args:
+        gtruth (array): label (either 0 or 1)
+        predictions (array): model prediction (either 0 or 1)
+        dset_name: the dataset that is evaluating on
+    """
+    clsf_metrics = {f'{dset_name}_{metric}':0 for metric in ['accuracy', 'roc_auc', 'f1_score', 'precision', 'recall']}
+    clsf_metrics[f"{dset_name}_accuracy"] = round(accuracy_score(gtruth, predictions), 4)
+    clsf_metrics[f"{dset_name}_roc_auc"] = round(roc_auc_score(gtruth, predictions), 4)
+    clsf_metrics[f"{dset_name}_f1_score"] = round(f1_score(gtruth, predictions), 4)
+    clsf_metrics[f"{dset_name}_precision"] = round(precision_score(gtruth, predictions), 4)
+    clsf_metrics[f"{dset_name}_recall"] = round(recall_score(gtruth, predictions), 4)
+    mlflow.log_metrics(clsf_metrics)
+
+def evaluate_model(model, X, y, dset_name):
+    """Evaluate on given model
+
+    Args:
+        model: NuSVC()
+        X: countvectorizers of feature(s)
+        y: label
+        dset_name: dataset that is evaluating on
+    """
+    enc = LabelEncoder()
+
+    predictions = model.predict(X)
+    gtruth = enc.fit_transform(y)
+    predictions = enc.transform(predictions)
+
+    print_metric(gtruth, predictions, dset_name)
 
 def main():
-    """Train and save the model
+    """Train the best model"""
+    experiment_name = 'train-mrec_v1.0.0'
+    mlflow.set_experiment(experiment_name)
+    logger.info(f'Beginning experiment {experiment_name}...')
 
-    Returns: NULL
+    run_name = 'hyperparamterized-nusvc'
+    with mlflow.start_run(run_name=run_name) as run:
 
-    """
-    ## Preprocessing dataset
-    logger.debug('Preprocessing classifier..')
+        model = NuSVC(degree=2, kernel='rbf', nu=0.25)
+        mlflow.log_params(model.get_params())
 
-    count_vect = CountVectorizer(ngram_range=(1, 3), analyzer=clean_text)
-    X_counts_train = count_vect.fit_transform(train['sentence'])
-    X_counts_validation = count_vect.transform(validation['sentence'])
+        train, train_label, val, val_label, test, test_label = preprocessing_dataset(csv_fnames)
 
-    ## Train the model
-    logger.debug('Training classifier..')
+        logger.info('Training model..')
+        model.fit(train, train_label)
 
-    random_forest = RandomForestClassifier()
-    random_forest.fit(X_counts_train, train['relation'])
+        logger.info('Running evaluations...')
+        logger.debug('Evaluating on train set..')
+        evaluate_model(model, train, train_label, 'training')
 
-    ## Evaluate the classifier
-    logger.debug('Evaluating classifier..')
+        logger.debug('Evaluating on validation set..')
+        evaluate_model(model, val, val_label, 'validation')
 
-    forest_accuracy = cross_val_score(random_forest, X_counts_validation, validation['relation'], scoring="accuracy",
-                                      cv=10)
-    logger.debug('Accuracy score on validation set:', forest_accuracy.mean())
+        logger.debug('Evaluating on test set..')
+        evaluate_model(model, test, test_label, 'test')
 
-    ## Save model
-    logger.debug('Saving the model..')
+    # show data logged in the parent run
+    logger.info(f"\n========== {experiment_name} run ==========")
+    for key, data in fetch_logged_data(run.info.run_id).items():
+        logger.info("\n---------- logged {} ----------".format(key))
+        pprint(data)
 
-    path = '../../models/random_forest.joblib'
-    joblib.dump((random_forest, count_vect), path)
+    if SAVE_MODEL:
+        model_path = f'../../models/baseline_model/{run_name}.joblib'
+        logger.info(f'Saved model to {model_path}')
 
 if __name__ == '__main__':
-    logger.debug('Loading dataset...')
-
-    # Read in training, validation data and labels
-    csv_fnames = {'train': 'dataset/raw/train.csv', 'validation': 'dataset/raw/validation.csv',
-                  'test': 'dataset/raw/test.csv'}
-    dataset = load_data(csv_fnames)
-    train, validation = dataset.train, dataset.validation
-
-    # Feature = sentence, target = relation (treats and causes only)
-    relation_type = ['causes', 'treats']
-    train = train[['sentence', 'relation']][train['relation'].isin(relation_type)].drop_duplicates()
-    validation = validation[['sentence', 'relation']][validation['relation'].isin(relation_type)].drop_duplicates()
-
-    logger.debug('Loaded dataset!')
-
     main()
