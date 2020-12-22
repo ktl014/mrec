@@ -24,7 +24,7 @@ import mrec.config as config
 from mrec.model.MREClassifier import MREClassifier
 from mrec.model.score_mrec import accuracy, compute_cm
 from mrec.data.dataset import load_data, load_rel_database
-from mrec.features.transform import clean_text          # CountVectorizer dependency. Do not remove.
+from mrec.features.transform import clean_text              # CountVectorizer dependency. Do not remove.
 
 # Module level constants
 enc = LabelEncoder()

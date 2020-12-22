@@ -11,5 +11,5 @@ numpy
 jupyterlab
 streamlit
 nltk
-Flask-SQLAlchemy
 sqlalchemy
+mlflow

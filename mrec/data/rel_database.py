@@ -15,7 +15,6 @@ import sys
 from pathlib import Path
 from sqlalchemy import create_engine
 
-assert os.getcwd() == str(Path(__file__).resolve().parents[2]), "Script must be ran from `mrec` project directory"
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]) + '/')
 
 # Third party imports
@@ -102,6 +101,8 @@ class Database:
             self.engine.dispose()
 
 if __name__ == "__main__":
+    assert os.getcwd() == str(Path(__file__).resolve().parents[2]), "Script must be ran from `mrec` project directory"
+
     db_path = 'dataset/external/mrec.db'
     validation_csv = 'dataset/raw/validation.csv'
     test_csv = 'dataset/raw/test.csv'
