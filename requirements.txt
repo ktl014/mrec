@@ -12,4 +12,5 @@ jupyterlab
 streamlit
 nltk
 sqlalchemy
+seaborn
 mlflow
