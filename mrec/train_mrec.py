@@ -20,6 +20,8 @@ $ mlflow ui
 """
 
 # Standard dist imports
+import os
+import joblib
 import sys
 from pathlib import Path
 import logging
@@ -42,8 +44,8 @@ logger.root.setLevel(logging.INFO)
 
 SAVE_MODEL = True
 #TODO figure out better way to store the relative paths for these datasets (symlink????)
-csv_fnames = {'train': '../dataset/processed/train.csv', 'validation': '../dataset/processed/validation.csv',
-              'test': '../dataset/processed/test.csv'}
+csv_fnames = {'train': 'dataset/processed/train.csv', 'validation': 'dataset/processed/validation.csv',
+              'test': 'dataset/processed/test.csv'}
 
 def print_metric(gtruth, predictions, dset_name):
     """Print 5 scoring metrics: accuracy, roc_auc, f1, precision, and recall
@@ -112,7 +114,11 @@ def main():
         pprint(data)
 
     if SAVE_MODEL:
-        model_path = f'../../models/clean_data_model/{run_name}.joblib'
+        cleaned_data_dir = os.path.join(str(Path(__file__).resolve().parents[1]), 'models/clean_data_model')
+        if not os.path.exists(cleaned_data_dir):
+            os.makedirs(cleaned_data_dir, exist_ok=True)
+
+        joblib.dump(model, model_path)
         logger.info(f'Saved model to {model_path}')
 
 if __name__ == '__main__':

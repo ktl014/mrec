@@ -110,3 +110,4 @@ ENV/
 .idea
 /mrec/model/mlruns/
 /mrec/mlruns/
+/mlruns/

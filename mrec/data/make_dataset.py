@@ -3,6 +3,11 @@
 Dataset operations module currently contains functions for the following:
 - preprocessing train datasets
 
+USAGE
+-----
+
+$ python mrec/data/make_dataset.py
+
 """
 # Standard Dist
 import logging
@@ -20,10 +25,11 @@ from mrec.data.dataset import load_data
 from mrec.features.transform import clean_text
 
 logger = logging.getLogger(__name__)
+logging.root.setLevel(logging.DEBUG)
 
 SAVE_PATH = '../../models/count_vectorizer.joblib'
-csv_fnames = {'train': '../../dataset/raw/train.csv', 'validation': '../../dataset/raw/validation.csv',
-              'test': '../../dataset/raw/test.csv'}
+csv_fnames = {'train': 'dataset/raw/train.csv', 'validation': 'dataset/raw/validation.csv',
+              'test': 'dataset/raw/test.csv'}
 
 def preprocessing_dataset(csv_fnames, save=False):
     """Preprocessing dataset and add feature engineering
@@ -89,7 +95,10 @@ def main():
 
     drop those based on the flag
     """
-    cleaned_data_dir = '/Users/ktle2/personal_projects/mrec/dataset/processed'
+    cleaned_data_dir = os.path.join(str(Path(__file__).resolve().parents[2]), 'dataset/processed')
+    if not os.path.exists(cleaned_data_dir):
+        os.makedirs(cleaned_data_dir, exist_ok=True)
+
     dataset = load_data(csv_fnames)
     train, validation, test = dataset.train, dataset.validation, dataset.test
 
@@ -101,11 +110,25 @@ def main():
         logger.debug('dataset size after: {}'.format(data.shape[0]))
         return data
 
+    def clean_overlapping_sentences(data, training_data):
+        df = data.copy()
+        overlapped_sentences = df[df['sentence'].isin(training_data['sentence'])]
+        logger.debug(f'\tFound overlapped {overlapped_sentences.shape[0]} sentences out of {df.shape[0]}. Now '
+                     f'removing...')
+        df = df.drop(overlapped_sentences.index)
+        logger.debug(f'\tNew dataset size: {df.shape[0]}')
+        return df
+
     csv_file = os.path.join(cleaned_data_dir, '{}.csv')
     data_ = dict(zip(csv_fnames.keys(), [train, validation, test]))
     for k, v in data_.items():
         logger.debug('Starting {} dataset'.format(k))
-        clean_data = clean_duplicates_and_mislabels(v)
+        clean_data = data_[k] = clean_duplicates_and_mislabels(v)
+
+        if k != 'train':
+            logger.debug(f'Cleaning up overlap in {k} dataset')
+            clean_data = clean_overlapping_sentences(clean_data, data_['train'])
+
         logger.debug(f'Dataset saved to {csv_file.format(k)}')
         clean_data.to_csv(csv_file.format(k))
 
