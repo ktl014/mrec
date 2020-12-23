@@ -39,3 +39,23 @@ train:
     md5: 39afee0992402ce4ab0c422fe431b911.dir
     size: 271412
     nfiles: 1
+prepare_dataset:
+  cmd: python mrec/data/make_dataset.py
+  deps:
+  - path: dataset/raw/test.csv
+    md5: 2df6f564e630a7ac7bd42f60353634e2
+    size: 2006658
+  - path: dataset/raw/train.csv
+    md5: ff641625f3b8aa7493af87da7ee3e8bd
+    size: 5943720
+  - path: dataset/raw/validation.csv
+    md5: a455687d5ff7dfc1a3c597e6575d2ffc
+    size: 1920415
+  - path: mrec/data/make_dataset.py
+    md5: 4a461408af174383e773f7836fac0661
+    size: 5283
+  outs:
+  - path: dataset/processed
+    md5: 8d0c474265f3125178cc0b452908df83.dir
+    size: 962179
+    nfiles: 3
