@@ -40,10 +40,10 @@ from mrec.model.ml_utils import fetch_logged_data
 logger = logging.getLogger(__name__)
 logger.root.setLevel(logging.INFO)
 
-SAVE_MODEL = False
+SAVE_MODEL = True
 #TODO figure out better way to store the relative paths for these datasets (symlink????)
-csv_fnames = {'train': '../dataset/raw/train.csv', 'validation': '../dataset/raw/validation.csv',
-              'test': '../dataset/raw/test.csv'}
+csv_fnames = {'train': '../dataset/processed/train.csv', 'validation': '../dataset/processed/validation.csv',
+              'test': '../dataset/processed/test.csv'}
 
 def print_metric(gtruth, predictions, dset_name):
     """Print 5 scoring metrics: accuracy, roc_auc, f1, precision, and recall
@@ -112,7 +112,7 @@ def main():
         pprint(data)
 
     if SAVE_MODEL:
-        model_path = f'../../models/baseline_model/{run_name}.joblib'
+        model_path = f'../../models/clean_data_model/{run_name}.joblib'
         logger.info(f'Saved model to {model_path}')
 
 if __name__ == '__main__':
