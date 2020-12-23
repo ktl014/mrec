@@ -1,3 +1,6 @@
 train:
-    seed: 20170428
-    n_estimators: 250
+    random_state: 20170428
+    degree: 2
+    kernel: rbf
+    nu: 0.25
+

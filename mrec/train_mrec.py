@@ -20,6 +20,7 @@ $ mlflow ui
 """
 
 # Standard dist imports
+from datetime import datetime
 import os
 import joblib
 import sys
@@ -27,6 +28,7 @@ from pathlib import Path
 import logging
 from pprint import pprint
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]) + '/')
+import yaml
 
 # Third Party Imports
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
@@ -86,9 +88,9 @@ def main():
     mlflow.set_experiment(experiment_name)
     logger.info(f'Beginning experiment {experiment_name}...')
 
-    run_name = 'hyperparamterized-nusvc'
+    run_name = f'model-run-{datetime.today().strftime("%Y%m%d_%H:%M:%S")}'
     with mlflow.start_run(run_name=run_name) as run:
-
+        params = yaml.safe_load(open('params.yaml'))['train']
         model = NuSVC(degree=2, kernel='rbf', nu=0.25)
         mlflow.log_params(model.get_params())
 
@@ -107,19 +109,21 @@ def main():
         logger.debug('Evaluating on test set..')
         evaluate_model(model, test, test_label, 'test')
 
-    # show data logged in the parent run
-    logger.info(f"\n========== {experiment_name} run ==========")
-    for key, data in fetch_logged_data(run.info.run_id).items():
-        logger.info("\n---------- logged {} ----------".format(key))
-        pprint(data)
+        # show data logged in the parent run
+        logger.info(f"\n========== {experiment_name} run ==========")
+        for key, data in fetch_logged_data(run.info.run_id).items():
+            logger.info("\n---------- logged {} ----------".format(key))
+            pprint(data)
 
-    if SAVE_MODEL:
-        cleaned_data_dir = os.path.join(str(Path(__file__).resolve().parents[1]), 'models/clean_data_model')
-        if not os.path.exists(cleaned_data_dir):
-            os.makedirs(cleaned_data_dir, exist_ok=True)
+        if SAVE_MODEL:
+            cleaned_data_dir = os.path.join(str(Path(__file__).resolve().parents[1]), 'models/clean_data_model')
+            if not os.path.exists(cleaned_data_dir):
+                os.makedirs(cleaned_data_dir, exist_ok=True)
 
-        joblib.dump(model, model_path)
-        logger.info(f'Saved model to {model_path}')
+            model_path = os.path.join(cleaned_data_dir, 'model.joblib')
+            joblib.dump(model, model_path)
+            mlflow.log_artifact(model_path, 'models/clean_data_model')
+            logger.info(f'Saved model to {model_path}')
 
 if __name__ == '__main__':
     main()

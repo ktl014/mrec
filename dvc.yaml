@@ -8,3 +8,15 @@ stages:
     - mrec/data/make_dataset.py
     outs:
     - dataset/processed
+  train:
+    cmd: python mrec/train_mrec.py
+    deps:
+    - dataset/processed
+    - mrec/train_mrec.py
+    outs:
+    - models/clean_data_model
+    params:
+    - train.degree
+    - train.kernel
+    - train.nu
+    - train.random_state

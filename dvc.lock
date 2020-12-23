@@ -1,4 +1,4 @@
-prepare_dataset:
+:qqeprepare_dataset:
   cmd: python mrec/data/make_dataset.py
   deps:
   - path: dataset/raw/test.csv
@@ -11,10 +11,31 @@ prepare_dataset:
     md5: a455687d5ff7dfc1a3c597e6575d2ffc
     size: 1920415
   - path: mrec/data/make_dataset.py
-    md5: 4cbf7831e9de4e9c85abcfe5a6e399cf
-    size: 5234
+    md5: 4a461408af174383e773f7836fac0661
+    size: 5283
   outs:
   - path: dataset/processed
     md5: 8d0c474265f3125178cc0b452908df83.dir
     size: 962179
     nfiles: 3
+train:
+  cmd: python mrec/train_mrec.py
+  deps:
+  - path: dataset/processed
+    md5: 8d0c474265f3125178cc0b452908df83.dir
+    size: 962179
+    nfiles: 3
+  - path: mrec/train_mrec.py
+    md5: b4a48e3a0bcde09087973760b3ce3e72
+    size: 4781
+  params:
+    params.yaml:
+      train.degree: 2
+      train.kernel: rbf
+      train.nu: 0.25
+      train.random_state: 20170428
+  outs:
+  - path: models/clean_data_model
+    md5: 39afee0992402ce4ab0c422fe431b911.dir
+    size: 271412
+    nfiles: 1
