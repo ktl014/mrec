@@ -1,0 +1,5 @@
+outs:
+- md5: 49ec723de7442f3481c4c49b0168d8eb.dir
+  size: 272997
+  nfiles: 2
+  path: clean_data_model
