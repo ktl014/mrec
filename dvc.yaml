@@ -1,0 +1,10 @@
+stages:
+  prepare_dataset:
+    cmd: python mrec/data/make_dataset.py
+    deps:
+    - dataset/raw/test.csv
+    - dataset/raw/train.csv
+    - dataset/raw/validation.csv
+    - mrec/data/make_dataset.py
+    outs:
+    - dataset/processed
