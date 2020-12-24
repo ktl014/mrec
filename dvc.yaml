@@ -13,10 +13,10 @@ stages:
     deps:
     - dataset/processed
     - mrec/train_mrec.py
-    outs:
-    - models/clean_data_model
     params:
     - train.degree
     - train.kernel
     - train.nu
     - train.random_state
+    outs:
+    - models/clean_data_model
