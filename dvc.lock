@@ -26,16 +26,17 @@ train:
     size: 962179
     nfiles: 3
   - path: mrec/train_mrec.py
-    md5: b4a48e3a0bcde09087973760b3ce3e72
-    size: 4781
+    md5: 7e149d701ede7e869133aeed6ca7340d
+    size: 4758
   params:
     params.yaml:
       train.degree: 2
+      train.gamma: scale
       train.kernel: rbf
       train.nu: 0.25
       train.random_state: 20170428
   outs:
   - path: models/clean_data_model
-    md5: 39afee0992402ce4ab0c422fe431b911.dir
-    size: 271412
+    md5: 611541ad8d2953277960cbea31217ec2.dir
+    size: 271416
     nfiles: 1
