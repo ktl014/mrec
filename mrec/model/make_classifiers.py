@@ -73,9 +73,12 @@ def make_classifiers():
         "C": [0.01, 0.1, 1.0, 10]
     }})
     parameters.update({"NuSVC": {
-        "nu": [0.25, 0.75],
-        "kernel": ["linear", "rbf"],
-        "degree": [2, 5]
+        "nu": [0.25, 0.5, 0.75, 0.99],
+        "kernel": ["linear", "rbf", 'poly', 'sigmoid'],
+        "degree": [2, 3, 4, 5],
+        "gamma": ["scale", "auto"],
+        "random_state": [20170428],
+        "decision_function_shape": ["ovo", "ovr"]
     }})
     parameters.update({"SVC": {
         "kernel": ["linear", "rbf",],

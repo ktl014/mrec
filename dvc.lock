@@ -25,13 +25,13 @@ train:
     size: 4758
   params:
     params.yaml:
-      train.degree: 2
+      train.degree: 3
       train.gamma: scale
       train.kernel: rbf
       train.nu: 0.25
       train.random_state: 20170428
   outs:
   - path: models/clean_data_model
-    md5: 611541ad8d2953277960cbea31217ec2.dir
+    md5: 7113a828b874661fe7c0c9c7ef1ae300.dir
     size: 271416
     nfiles: 1

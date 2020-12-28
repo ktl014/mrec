@@ -3,8 +3,7 @@
 USAGE
 -----
 
-$ cd mrec/model
-$ python grid_search.py
+$ python mrec/model/grid_search.py
 # Launch an mlflow tracking ui after model results to compare
 $ mlflow ui
 
@@ -34,10 +33,11 @@ from mrec.model.ml_utils import fetch_logged_data
 logger = logging.getLogger(__name__)
 logger.root.setLevel(logging.INFO)
 
-SAVE_PATH = '../../models/baseline_model/final_model.joblib'
+SAVE_PATH = 'models/baseline_model/final_model.joblib'
 MODEL_NAME = 'NuSVC'
-csv_fnames = {'train': '../../dataset/raw/train.csv', 'validation': '../../dataset/raw/validation.csv',
-              'test': '../../dataset/raw/test.csv'}
+csv_fnames = {'train': 'dataset/processed/train.csv',
+              'validation': 'dataset/processed/validation.csv',
+              'test': 'dataset/processed/test.csv'}
 
 def tuning_parameters(model, param_grid, X, y):
     """Fine-tuning parameter for a given model

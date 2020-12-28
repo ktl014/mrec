@@ -91,7 +91,7 @@ def main():
     run_name = f'model-run-{datetime.today().strftime("%Y%m%d_%H:%M:%S")}'
     with mlflow.start_run(run_name=run_name) as run:
         params = yaml.safe_load(open('params.yaml'))['train']
-        model = NuSVC(degree=2, kernel='rbf', nu=0.25)
+        model = NuSVC(**params)
         mlflow.log_params(model.get_params())
 
         train, train_label, val, val_label, test, test_label = preprocessing_dataset(csv_fnames)

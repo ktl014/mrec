@@ -3,4 +3,5 @@ train:
     degree: 2
     kernel: rbf
     nu: 0.25
+    gamma: scale
 
