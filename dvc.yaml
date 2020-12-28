@@ -2,9 +2,7 @@ stages:
   prepare_dataset:
     cmd: python mrec/data/make_dataset.py
     deps:
-    - dataset/raw/test.csv
-    - dataset/raw/train.csv
-    - dataset/raw/validation.csv
+    - dataset/raw
     - mrec/data/make_dataset.py
     outs:
     - dataset/processed
@@ -15,6 +13,7 @@ stages:
     - mrec/train_mrec.py
     params:
     - train.degree
+    - train.gamma
     - train.kernel
     - train.nu
     - train.random_state
