@@ -59,7 +59,8 @@ def tuning_parameters(model, param_grid, X, y):
 def main():
     experiment_name = 'grid-search'
     mlflow.set_experiment(experiment_name)
-    logger.info('Beginning grid search')
+    logger.info(f'Beginning experiment {experiment_name} (tracked '
+                f'{"remotely" if mlflow.tracking.is_tracking_uri_set() else "locally"})...')
     mlflow.sklearn.autolog()
 
     logger.info('Preparing datasets and models..')

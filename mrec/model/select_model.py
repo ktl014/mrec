@@ -4,8 +4,7 @@ Train each model, run through val set to select best model
 USAGE
 -----
 
-$ cd mrec/model
-$ python select_model.py
+$ python mrec/model/select_model.py
 # Launch an mlflow tracking ui after model results to compare
 $ mlflow ui
 
@@ -33,10 +32,12 @@ from mrec.model.grid_search import tuning_parameters
 logger = logging.getLogger(__name__)
 logger.root.setLevel(logging.INFO)
 
-SAVE_PATH = '../../models/baseline_model/final_model.joblib'
+SAVE_PATH = 'models/baseline_model/final_model.joblib'
 GRID_SEARCH = True
-csv_fnames = {'train': '../../dataset/raw/train.csv', 'validation': '../../dataset/raw/validation.csv',
-              'test': '../../dataset/raw/test.csv'}
+csv_fnames = {'train': 'dataset/raw/train.csv', 'validation': 'dataset/raw/validation.csv',
+              'test': 'dataset/raw/test.csv'}
+RESULTS_FILE = 'models/baseline_model/model_selection_results.csv'
+
 
 def select_model(grid_search=GRID_SEARCH):
     results = {}
@@ -48,7 +49,8 @@ def select_model(grid_search=GRID_SEARCH):
     # Begin experiment tracking
     experiment_name = 'select-models_and_grid-search' if grid_search else 'select-models'
     mlflow.set_experiment(experiment_name)
-    logger.info(f'Beginning experiment {experiment_name}...')
+    logger.info(f'Beginning experiment {experiment_name} (tracked '
+                f'{"remotely" if mlflow.tracking.is_tracking_uri_set() else "locally"})...')
     mlflow.sklearn.autolog()
 
     parent_run = mlflow.start_run(run_name="SELECT_MODEL_PARENT_RUN")
@@ -97,10 +99,9 @@ def select_model(grid_search=GRID_SEARCH):
     logger.info(f'Best model: {best_model}; CV-Score: {best_score}')
 
     # Save results of the best model
-    results_file = '../../models/baseline_model/model_selection_results.csv'
-    logger.info(f'Results saved to {results_file}')
-    runs.to_csv(results_file)
-    mlflow.log_artifact(results_file, artifact_path="baseline_model")
+    logger.info(f'Results saved to {RESULTS_FILE}')
+    runs.to_csv(RESULTS_FILE)
+    mlflow.log_artifact(RESULTS_FILE, artifact_path="baseline_model")
 
     # Save the model
     logger.info(f'Saving best model as {SAVE_PATH}')

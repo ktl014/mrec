@@ -36,6 +36,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.svm import NuSVC
 import mlflow
 import mlflow.sklearn
+import mlflow.exceptions
 
 # Project Level Imports
 from mrec.data.make_dataset import preprocessing_dataset
@@ -86,7 +87,8 @@ def main():
     """Train the best model"""
     experiment_name = 'train-mrec_v1.0.0'
     mlflow.set_experiment(experiment_name)
-    logger.info(f'Beginning experiment {experiment_name}...')
+    logger.info(f'Beginning experiment {experiment_name} (tracked '
+                f'{"remotely" if mlflow.tracking.is_tracking_uri_set() else "locally"})...')
 
     run_name = f'model-run-{datetime.today().strftime("%Y%m%d_%H:%M:%S")}'
     with mlflow.start_run(run_name=run_name) as run:
@@ -109,11 +111,7 @@ def main():
         logger.debug('Evaluating on test set..')
         evaluate_model(model, test, test_label, 'test')
 
-        # show data logged in the parent run
-        logger.info(f"\n========== {experiment_name} run ==========")
-        for key, data in fetch_logged_data(run.info.run_id).items():
-            logger.info("\n---------- logged {} ----------".format(key))
-            pprint(data)
+        mlflow.log_artifact(local_path='./mrec/train_mrec.py')
 
         if SAVE_MODEL:
             cleaned_data_dir = os.path.join(str(Path(__file__).resolve().parents[1]), 'models/clean_data_model')
@@ -123,7 +121,19 @@ def main():
             model_path = os.path.join(cleaned_data_dir, 'model.joblib')
             joblib.dump(model, model_path)
             mlflow.log_artifact(model_path, 'models/clean_data_model')
-            logger.info(f'Saved model to {model_path}')
+            try:
+                mlflow.sklearn.log_model(sk_model=model,
+                                         artifact_path="mrec-joblib-model",
+                                         registered_model_name="mrec-joblib-model")
+            except mlflow.exceptions.MlflowException as e:
+                logger.warning("Model registery was not found to upload model to relational database registery.")
+
+        # show data logged in the parent run
+        logger.info(f"\n========== {experiment_name} run ==========")
+        for key, data in fetch_logged_data(run.info.run_id).items():
+            logger.info("\n---------- logged {} ----------".format(key))
+            pprint(data)
+        logger.info(f'Saved model to {model_path}')
 
 if __name__ == '__main__':
     main()
