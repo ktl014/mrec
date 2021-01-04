@@ -11,3 +11,8 @@ numpy
 jupyterlab
 streamlit
 nltk
+sqlalchemy
+seaborn
+mlflow
+dvc
+pyaml

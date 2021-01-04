@@ -13,7 +13,7 @@ class TestDataset():
     def test_load_data(self):
         #=== Test Inputs ===#
         TEST_CSV_DATASETS = {
-            'train': "dataset/raw/train.csv"
+            'train': "./tests/data/train-sample.csv"
         }
         datasets = load_data(TEST_CSV_DATASETS)
         assert hasattr(datasets, 'train')
@@ -25,3 +25,20 @@ class TestDataset():
         with pytest.raises(FileNotFoundError):
             TEST_CSV_DATASETS['val'] = "WRONG/PATH/val.csv"
             datasets = load_data(TEST_CSV_DATASETS)
+
+    def test_load_rel_database(self):
+        #=== Test Inputs ===#
+        TEST_DATABASE = {
+            'mrec': 'dataset/external/mrec.db'
+        }
+        table_name = "mrec_table"
+
+        dataset = load_rel_database(TEST_DATABASE['mrec'], table_name)
+        assert isinstance(dataset, pd.DataFrame)
+
+        with pytest.raises(TypeError):
+            datasets = load_rel_database(TEST_DATABASE, table_name)
+
+        with pytest.raises(FileNotFoundError):
+            TEST_DATABASE['val'] = "WRONG/PATH/val.db"
+            dataset = load_rel_database(TEST_DATABASE['val'], table_name)

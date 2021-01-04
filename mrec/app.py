@@ -4,7 +4,6 @@ Module is used to launch classification system
 
 """
 # Standard Dist Imports
-from datetime import datetime
 import logging
 import sys
 from pathlib import Path
@@ -20,39 +19,74 @@ from sklearn.preprocessing import LabelEncoder
 
 # Project level imports
 import mrec.mrec
-from mrec.data.dataset import load_data
-from mrec.visualization import SessionState
 from mrec.visualization.medical_term_lookup import display_medical_terms
 import mrec.config as config
 from mrec.model.MREClassifier import MREClassifier
-from mrec.features.transform import clean_text
 from mrec.model.score_mrec import accuracy, compute_cm
+from mrec.data.dataset import load_data, load_rel_database
+from mrec.features.transform import clean_text              # CountVectorizer dependency. Do not remove.
 
 # Module level constants
 enc = LabelEncoder()
 FEATURES_LIST = ['_unit_id', 'relation', 'sentence', 'direction', 'term1', 'term2']
 logger = logging.getLogger(__name__)
-SEED = 1
-SAMPLE_SIZE = 10
+SEED = 5
+SAMPLE_SIZE = 100
 
 
 # === Load dataset as cache ===#
 @st.cache
-def load_data_to_cache(csv_fnames):
+def load_data_to_cache(csv_fnames: dict) -> pd.DataFrame:
     """ Load dataset for web application
 
+    Usage
+
+    >>> try:
+    >>>     dataset = load_rel_database_to_cache({'validation': 'dataset/raw/validation.csv'})
+    >>>     data = dataset.sample(n=SAMPLE_SIZE, random_state=SEED)
+    >>> except:
+    >>>     st.error(
+    >>>            "No such file could be found in the working directory. Make sure it is there and it is a csv-file.")
+
     Args:
-        csv_fnames (dict): Dictionary of csv absolute paths to load data from
+        csv_fnames (dict): Dictionary of csv absolute paths to load data from. Default is to load the validation set
 
     Returns:
-        Airbnb: Named collection tuple of Airbnb dataset
+        pd.DataFrame: Validation set
 
     """
     dataset = load_data(csv_fnames)
     val = dataset.validation[FEATURES_LIST]
     relation_type = ['causes', 'treats']
     val = val[val['relation'].isin(relation_type)].drop_duplicates()
+
     return val
+
+
+@st.cache(allow_output_mutation=True)
+def load_rel_database_to_cache(db_path: str, table_name: str) -> pd.DataFrame:
+    """Load dataset from relational database
+
+    Usage
+
+    >>> dataset = load_rel_database_to_cache(config.DB_PATH["mrec"], 'mrec_table')
+    >>> data = dataset.sample(n=SAMPLE_SIZE, random_state=SEED)
+
+    Args:
+        db_path (str): database file path to load data from
+        table_name (str): the name of the table in the database
+
+    Returns:
+        DataFrame: new dataframe after doing majority vote on `direction`
+    """
+    dataset = load_rel_database(db_path, table_name)
+    relation_type = ['causes', 'treats']
+    new_dataset = dataset[dataset['relation'].isin(relation_type)]
+
+    # Pick majority vote on `direction`
+    new_dataset = new_dataset.groupby(['_unit_id', 'relation', 'sentence', 'term1', 'term2'])['direction'].agg(pd.Series.mode).reset_index()
+
+    return new_dataset
 
 
 def run():
@@ -62,8 +96,7 @@ def run():
     filename = st.sidebar.selectbox("Choose a file.", ("None", "samples"))
     if filename is not "None":
         try:
-            dataset = load_data_to_cache(config.CSV_FNAMES)
-            #TODO replace dataset.sample with SQL QUERY to sample data from database
+            dataset = load_rel_database_to_cache(config.DB_PATH["mrec"], 'mrec_table')
             data = dataset.sample(n=SAMPLE_SIZE, random_state=SEED)
         except:
             st.error(
@@ -121,7 +154,6 @@ def run():
         st.subheader("Provide sample.")
         st.write("The model can now be used for **prediction** of the medical specialty. Below is another data "
                  "sample with its associated medical terms for the relationship")
-        # TODO replace dataset.sample with SQL QUERY to sample data from database
         data = dataset.sample(n=1, random_state=SEED).iloc[0].to_dict()
         text = st.text_area("Write some text below", value=data['sentence'])
 

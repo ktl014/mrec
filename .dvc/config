@@ -1,0 +1,13 @@
+[core]
+    remote = medical-relation-models
+    analytics = false
+['remote "myremote"']
+    url = /tmp/dvc-storage-mrec-v3
+['remote "medical-relation-data"']
+    url = s3://mrec-s3-bucket/medical_relations/data
+    region = us-west-1
+    credentialpath = ../s3_credentials
+['remote "medical-relation-models"']
+    url = s3://mrec-s3-bucket/medical_relations/models
+    region = us-west-1
+    credentialpath = ../s3_credentials

@@ -5,9 +5,6 @@
 import pytest
 
 
-from mrec import mrec
-
-
 @pytest.fixture
 def response():
     """Sample pytest fixture.

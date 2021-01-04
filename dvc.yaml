@@ -1,0 +1,21 @@
+stages:
+  prepare_dataset:
+    cmd: python mrec/data/make_dataset.py
+    deps:
+    - dataset/raw
+    - mrec/data/make_dataset.py
+    outs:
+    - dataset/processed
+  train:
+    cmd: python mrec/train_mrec.py
+    deps:
+    - dataset/processed
+    - mrec/train_mrec.py
+    params:
+    - train.degree
+    - train.gamma
+    - train.kernel
+    - train.nu
+    - train.random_state
+    outs:
+    - models/clean_data_model

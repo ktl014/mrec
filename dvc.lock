@@ -1,0 +1,37 @@
+prepare_dataset:
+  cmd: python mrec/data/make_dataset.py
+  deps:
+  - path: dataset/raw
+    md5: 308f4b6d0bf4d605670c0fd74df28a2a.dir
+    size: 9870793
+    nfiles: 3
+  - path: mrec/data/make_dataset.py
+    md5: 4a461408af174383e773f7836fac0661
+    size: 5283
+  outs:
+  - path: dataset/processed
+    md5: 8d0c474265f3125178cc0b452908df83.dir
+    size: 962179
+    nfiles: 3
+train:
+  cmd: python mrec/train_mrec.py
+  deps:
+  - path: dataset/processed
+    md5: 8d0c474265f3125178cc0b452908df83.dir
+    size: 962179
+    nfiles: 3
+  - path: mrec/train_mrec.py
+    md5: b1f2dd8c0398b0b02a58064def19fc5d
+    size: 5240
+  params:
+    params.yaml:
+      train.degree: 3
+      train.gamma: scale
+      train.kernel: sigmoid
+      train.nu: 0.25
+      train.random_state: 20170428
+  outs:
+  - path: models/clean_data_model
+    md5: 03c39be5d04b66023a7802f51da6b3e1.dir
+    size: 147904
+    nfiles: 1
