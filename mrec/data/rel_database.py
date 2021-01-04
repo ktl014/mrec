@@ -92,7 +92,7 @@ class Database:
         self.cursor = self.conn.cursor()
 
 
-    def _create_connection(self, db_path: str) -> sqlite3.connect():
+    def _create_connection(self, db_path: str):
         """ Create a db connection to database
 
         Args:
