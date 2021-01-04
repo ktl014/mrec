@@ -13,7 +13,7 @@ Usage
 -----
 >>> SAVE_MODEL = False
 >>> # then run the script using the command below
-$ python mrec/train_model.py
+$ python mrec/train_mrec.py
 # Run MlFlow UI after to view results
 $ mlflow ui
 
@@ -114,10 +114,11 @@ def main():
         pprint(data)
 
     if SAVE_MODEL:
-        cleaned_data_dir = os.path.join(str(Path(__file__).resolve().parents[1]), 'models/clean_data_model')
+        cleaned_data_dir = os.path.join(str(Path(__file__).resolve().parents[1]), 'models/baseline_model')
         if not os.path.exists(cleaned_data_dir):
             os.makedirs(cleaned_data_dir, exist_ok=True)
 
+        model_path = os.path.join(cleaned_data_dir, f'{run_name}.joblib')
         joblib.dump(model, model_path)
         logger.info(f'Saved model to {model_path}')
 

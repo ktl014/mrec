@@ -27,17 +27,22 @@ from mrec.features.transform import clean_text
 logger = logging.getLogger(__name__)
 logging.root.setLevel(logging.DEBUG)
 
-SAVE_PATH = '../../models/count_vectorizer.joblib'
+DEFAULT_SAVE_PATH = '../../models/count_vectorizer.joblib'
 csv_fnames = {'train': 'dataset/raw/train.csv', 'validation': 'dataset/raw/validation.csv',
               'test': 'dataset/raw/test.csv'}
 
-def preprocessing_dataset(csv_fnames, save=False):
+def preprocessing_dataset(csv_fnames, save=False, SAVE_PATH=DEFAULT_SAVE_PATH):
     """Preprocessing dataset and add feature engineering
 
     Usage
     ------
     >>> from mrec.data.make_dataset import preprocessing_dataset
-    >>> X_train, X_train_label, X_val, X_val_label = preprocessing_dataset()
+    >>> X_train, X_train_label, X_val, X_val_label, X_test, X_test_label = preprocessing_dataset(csv_fnames)
+
+    Args:
+        csv_fnames (dict): dictionary of files path
+        save (bool): save count vectorizer used to fit and transform the dataset if true
+        SAVE_PATH (str): determine where to save the count vectorizer
 
     Returns:
         X_counts_train (sparse matrix): countvectorizer of train feature(s)
@@ -63,14 +68,17 @@ def preprocessing_dataset(csv_fnames, save=False):
     # Preprocessing entails doing count vectorization
     # vectorizer includes `clean_text` for cleaning out punctuation and lemnatizing words
     logger.debug('Preprocessing dataset..')
-    #TODO add feature engineering
+
     count_vect = CountVectorizer(ngram_range=(1, 3), analyzer=clean_text)
+
     # train tokenization
     X_counts_train = count_vect.fit_transform(train['sentence'])
     X_train_label = train['relation']
+
     # validation tokenization
     X_counts_validation = count_vect.transform(validation['sentence'])
     X_validation_label = validation['relation']
+
     # test set tokenization
     X_counts_test = count_vect.transform(test['sentence'])
     X_test_label = test['relation']
@@ -78,11 +86,31 @@ def preprocessing_dataset(csv_fnames, save=False):
     # preprocessing complete at this point
     logger.debug('Finished preprocessing dataset!')
 
-    #TODO raise error if this path is not found
     if save:
+        if not os.path.exists(SAVE_PATH):
+            raise FileNotFoundError(f"File {SAVE_PATH} was not found. Current dir: {os.getcwd()}")
+
         joblib.dump(count_vect, SAVE_PATH)
 
     return X_counts_train, X_train_label, X_counts_validation, X_validation_label, X_counts_test, X_test_label
+
+def clean_duplicates_and_mislabels(data):
+    logger.debug('dataset size before: {}'.format(data.shape[0]))
+    relation_type = ['causes', 'treats']
+    data = data[data['relation'].isin(relation_type)].drop_duplicates(subset='_unit_id')
+    data = data.drop(list(data[data['sentence'].duplicated(False)].index))
+    logger.debug('dataset size after: {}'.format(data.shape[0]))
+    return data
+
+def clean_overlapping_sentences(data, training_data):
+    """Clean overlapping sentences between data and training data and return new data"""
+    df = data.copy()
+    overlapped_sentences = df[df['sentence'].isin(training_data['sentence'])]
+    logger.debug(f'\tFound overlapped {overlapped_sentences.shape[0]} sentences out of {df.shape[0]}. Now '
+                 f'removing...')
+    df = df.drop(overlapped_sentences.index)
+    logger.debug(f'\tNew dataset size: {df.shape[0]}')
+    return df
 
 def main():
     """
@@ -101,23 +129,6 @@ def main():
 
     dataset = load_data(csv_fnames)
     train, validation, test = dataset.train, dataset.validation, dataset.test
-
-    def clean_duplicates_and_mislabels(data):
-        logger.debug('dataset size before: {}'.format(data.shape[0]))
-        relation_type = ['causes', 'treats']
-        data = data[data['relation'].isin(relation_type)].drop_duplicates(subset='_unit_id')
-        data = data.drop(list(data[data['sentence'].duplicated(False)].index))
-        logger.debug('dataset size after: {}'.format(data.shape[0]))
-        return data
-
-    def clean_overlapping_sentences(data, training_data):
-        df = data.copy()
-        overlapped_sentences = df[df['sentence'].isin(training_data['sentence'])]
-        logger.debug(f'\tFound overlapped {overlapped_sentences.shape[0]} sentences out of {df.shape[0]}. Now '
-                     f'removing...')
-        df = df.drop(overlapped_sentences.index)
-        logger.debug(f'\tNew dataset size: {df.shape[0]}')
-        return df
 
     csv_file = os.path.join(cleaned_data_dir, '{}.csv')
     data_ = dict(zip(csv_fnames.keys(), [train, validation, test]))
