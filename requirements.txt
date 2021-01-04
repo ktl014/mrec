@@ -14,5 +14,5 @@ nltk
 sqlalchemy
 seaborn
 mlflow
-dvc
+dvc[s3]
 pyaml
