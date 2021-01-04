@@ -36,14 +36,23 @@ SAMPLE_SIZE = 100
 
 # === Load dataset as cache ===#
 @st.cache
-def load_data_to_cache(csv_fnames):
+def load_data_to_cache(csv_fnames: dict) -> pd.DataFrame:
     """ Load dataset for web application
 
+    Usage
+
+    >>> try:
+    >>>     dataset = load_rel_database_to_cache({'validation': 'dataset/raw/validation.csv'})
+    >>>     data = dataset.sample(n=SAMPLE_SIZE, random_state=SEED)
+    >>> except:
+    >>>     st.error(
+    >>>            "No such file could be found in the working directory. Make sure it is there and it is a csv-file.")
+
     Args:
-        csv_fnames (dict): Dictionary of csv absolute paths to load data from
+        csv_fnames (dict): Dictionary of csv absolute paths to load data from. Default is to load the validation set
 
     Returns:
-        Airbnb: Named collection tuple of Airbnb dataset
+        pd.DataFrame: Validation set
 
     """
     dataset = load_data(csv_fnames)
@@ -55,8 +64,13 @@ def load_data_to_cache(csv_fnames):
 
 
 @st.cache(allow_output_mutation=True)
-def load_rel_database_to_cache(db_path, table_name):
+def load_rel_database_to_cache(db_path: str, table_name: str) -> pd.DataFrame:
     """Load dataset from relational database
+
+    Usage
+
+    >>> dataset = load_rel_database_to_cache(config.DB_PATH["mrec"], 'mrec_table')
+    >>> data = dataset.sample(n=SAMPLE_SIZE, random_state=SEED)
 
     Args:
         db_path (str): database file path to load data from

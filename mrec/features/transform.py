@@ -1,3 +1,9 @@
+"""Module for feature transformation
+
+Transformation currently consists of removing punctuations,
+tokenizing, removing stop words and lemmatizing
+
+"""
 import nltk
 import string
 

@@ -40,6 +40,16 @@ RESULTS_FILE = 'models/baseline_model/model_selection_results.csv'
 
 
 def select_model(grid_search=GRID_SEARCH):
+    """ Script to run model selection
+
+    Within model selection, script provides option to run hyperparamter tuning.
+
+    Args:
+        grid_search: Flag to run grid search. Default is True.
+
+    Returns:
+
+    """
     results = {}
 
     logger.info('Preparing datasets and models..')

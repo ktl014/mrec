@@ -3,7 +3,7 @@ Filename: rel_database
 Description: CRUD functions to interact with a database
 USAGE
 -----
-$ python rel_database.py
+$ python mrec/data/rel_database.py
 
 """
 # imports
@@ -35,7 +35,20 @@ SQL_CreateTable = '''CREATE TABLE IF NOT EXISTS mrec_table (
 
 logger = logging.getLogger(__name__)
 
-def create_db(db_path, validation_csv, test_csv):
+def create_db(db_path: str, validation_csv: str, test_csv: str):
+    """ Create database
+
+    Database is created by first loading the csv dataset files, then importing the
+    data into a created sqllite database.
+
+    Args:
+        db_path: Absolute path for output database.
+        validation_csv: Absolute path to validation set csv file.
+        test_csv: Absoltue path to test set csv file.
+
+    Returns:
+
+    """
     from mrec.data.dataset import load_data
 
     if not os.path.exists(validation_csv):
@@ -64,24 +77,31 @@ class Database:
     """ Database instance for CRUD interaction
     """
 
-    def __init__(self, db_path):
-        """ construct the database
-        :param db_path: path to the database
+    def __init__(self, db_path: str):
+        """ Initializes a Database
+
+        A sqllite database is created given the database path. Connections and cursors are access via attributes.
+
+        Args:
+            db_path:
         """
-        #if os.path.exists(db_path):
-        #    raise FileExistsError(f"File {db_path} is existed!")
 
         Path(db_path).touch()
-        self.conn = self.create_connection(db_path)
+        self.conn = self._create_connection(db_path)
         self.engine = create_engine('sqlite:///' + db_path, echo=False)
         self.cursor = self.conn.cursor()
 
 
-    def create_connection(self, db_path):
-        """ create a db connection to database
-        :param db_path: database file path
-        :return: Connection object or None
+    def _create_connection(self, db_path: str) -> sqlite3.connect():
+        """ Create a db connection to database
+
+        Args:
+            db_path: Absolute path to database
+
+        Returns:
+            conn: Sqlite3 connection. Default is none if error is raised
         """
+
         try:
             conn = sqlite3.connect(db_path)
             logger.debug('SUCCESS: Table Connected')
@@ -92,7 +112,10 @@ class Database:
         return None
 
     def close_connection(self):
-        """ close the connection
+        """ Close the connection and engine
+
+        Returns:
+
         """
         if self.conn != None:
             self.conn.close()

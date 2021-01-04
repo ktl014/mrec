@@ -14,7 +14,7 @@ Usage
 >>> SAVE_MODEL = False
 >>> # then run the script using the command below
 $ python mrec/train_model.py
-# Run MlFlow UI after to view results
+>>> # Run MlFlow UI after to view results
 $ mlflow ui
 
 """

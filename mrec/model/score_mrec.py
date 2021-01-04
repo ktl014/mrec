@@ -19,9 +19,33 @@ warnings.filterwarnings('ignore')
 logger = logging.getLogger(__name__)
 
 def accuracy(gtruth: np.array, predictions: np.array):
+    """ Compute accuracy
+
+    Args:
+        gtruth: Ground truth
+        predictions: Predictions
+
+    Returns:
+        float64: Accuracy score
+
+    """
     return (gtruth == predictions).mean()
 
 def compute_cm(gtruth: np.array, predictions: np.array, classes: list, plot=False, save=True):
+    """ Compute confusion matrix
+
+    Args:
+        gtruth: Gtruth
+        predictions: Predictions
+        classes: List of classes
+        plot: Flag to plot confusion matrix. Default is False
+        save: Flag to save confusion matrix image. Default is True
+
+    Returns:
+        confusion matrix (normalized)
+        average of diagonal along confusion matrix
+
+    """
     # Create array for confusion matrix with dimensions based on number of classes
     num_class = len(classes)
     confusion_matrix_rawcount = np.zeros((num_class, num_class))
@@ -44,7 +68,19 @@ def compute_cm(gtruth: np.array, predictions: np.array, classes: list, plot=Fals
     return confusion_matrix_rate, np.nanmean(np.diag(confusion_matrix_rate))
 
 def _plot_confusion_matrix(cm, classes, cmap=plt.cm.Blues, save=False):
-    """Plot the confusion matrix and diagonal class accuracies"""
+    """ Plot the confusion matrix and diagonal class accuracies
+
+    Helper function to plot confusion matrix
+
+    Args:
+        cm: Confusion matrix
+        classes: List of classes
+        cmap: Matplotlib color map
+        save: Flag to save confusion matrix image. Default is False.
+
+    Returns:
+
+    """
     plt.figure(figsize=(20, 10))
     plt.subplot(1, 2, 1)
     plt.imshow(cm, interpolation='nearest', cmap=cmap)

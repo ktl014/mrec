@@ -73,7 +73,7 @@ def make_classifiers():
         "C": [0.01, 0.1, 1.0, 10]
     }})
     parameters.update({"NuSVC": {
-        "nu": [0.25, 0.5, 0.75, 0.99],
+        "nu": [0.25, 0.5, 0.75, 0.9],
         "kernel": ["linear", "rbf", 'poly', 'sigmoid'],
         "degree": [2, 3, 4, 5],
         "gamma": ["scale", "auto"],
