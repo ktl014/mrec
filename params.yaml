@@ -2,6 +2,6 @@ train:
     random_state: 20170428
     degree: 2
     kernel: rbf
-    nu: 0.25
+    nu: 0.75
     gamma: scale
 

@@ -1,5 +1,5 @@
 [core]
-    remote = medical-relation-models
+    remote = another_remote
     analytics = false
 ['remote "myremote"']
     url = /tmp/dvc-storage-mrec-v3
@@ -11,3 +11,6 @@
     url = s3://mrec-s3-bucket/medical_relations/models
     region = us-west-1
     credentialpath = ../s3_credentials
+['remote "another_remote"']
+    url = s3://mrec-s3-bucket
+    endpointurl = http://172.31.36.90
